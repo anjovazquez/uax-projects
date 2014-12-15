@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">APaint</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    
+    
+    <string name="brush_color">color</string>
+    <string name="brush_size">tamaño</string>
+    <string name="brush_title">tamaño</string>
+    <string name="recycle">borrar</string>
+    <string name="undo">deshacer</string>
+    <string name="redo">rehacer</string>
+    <string name="share">compartir</string>
+
+</resources>

@@ -1,0 +1,40 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/action_brush_size"
+        android:icon="@drawable/paint_brush"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom"
+        android:title="@string/brush_size"/>
+    <item
+        android:id="@+id/action_brush_color"
+        android:icon="@drawable/color_palette"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom"
+        android:title="@string/brush_color"/>
+    <item
+        android:id="@+id/action_recycle"
+        android:icon="@drawable/recycle"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom"
+        android:title="@string/recycle"/>
+    <item
+        android:id="@+id/action_undo"
+        android:icon="@drawable/ic_action_undo"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom"
+        android:title="@string/undo"/>
+    <item
+        android:id="@+id/action_redo"
+        android:icon="@drawable/ic_action_redo"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom"
+        android:title="@string/redo"/>
+    <item
+        android:id="@+id/menu_item_share"
+        android:actionProviderClass="android.widget.ShareActionProvider"
+        android:showAsAction="ifRoom"
+        android:title="@string/share"
+        android:icon="@drawable/ic_action_share"/>
+
+</menu>
