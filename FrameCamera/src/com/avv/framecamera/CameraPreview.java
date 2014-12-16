@@ -20,7 +20,6 @@ public class CameraPreview extends FrameLayout implements
 		SurfaceHolder.Callback {
 
 	private SurfaceView surfaceView;
-
 	private Camera camera;
 
 	private final int REAR_CAMERA = 0;
@@ -39,7 +38,6 @@ public class CameraPreview extends FrameLayout implements
 
 		SurfaceHolder holder = surfaceView.getHolder();
 		holder.addCallback(this);
-
 		holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 		holder.setKeepScreenOn(true);
 	}
@@ -97,16 +95,16 @@ public class CameraPreview extends FrameLayout implements
 		
 		Size cameraSize = camera.getParameters().getPreviewSize();
 		
-		if(display.getRotation() == Surface.ROTATION_0 || display.getRotation() == Surface.ROTATION_180 && (cameraOrientation == 90 || cameraOrientation == 270)){
-			cameraSize.width = camera.getParameters().getPreviewSize().height;
-			cameraSize.height = camera.getParameters().getPreviewSize().width;
-			
-			camera.setDisplayOrientation(90);
-			
-			float ratio = (float) cameraSize.width / (float) cameraSize.height;
-			
-			FrameLayout.LayoutParams params = new FrameLayout.LayoutParams((int) (height*ratio), height, Gravity.CENTER);
-			surfaceView.setLayoutParams(params);
+//		if(display.getRotation() == Surface.ROTATION_0 || display.getRotation() == Surface.ROTATION_180 && (cameraOrientation == 90 || cameraOrientation == 270)){
+//			cameraSize.width = camera.getParameters().getPreviewSize().height;
+//			cameraSize.height = camera.getParameters().getPreviewSize().width;
+//			
+//			camera.setDisplayOrientation(90);
+//			
+//			float ratio = (float) cameraSize.width / (float) cameraSize.height;
+//			
+//			FrameLayout.LayoutParams params = new FrameLayout.LayoutParams((int) (height*ratio), height, Gravity.CENTER);
+//			surfaceView.setLayoutParams(params);
 			
 			try{
 				camera.setPreviewDisplay(holder);
@@ -115,7 +113,7 @@ public class CameraPreview extends FrameLayout implements
 				Log.d("CameraPreview", "Error al mostrar vista previa: "+e.getMessage());
 			}
 		
-		}
+//		}
 	}
 
 	@Override

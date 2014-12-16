@@ -16,7 +16,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:background="@android:drawable/ic_menu_camera" />
+        android:background="@android:drawable/ic_menu_camera" 
+        android:onClick="takePhoto"/>
     
     <ImageView android:id="@+id/imageView"
         android:layout_width="50dp"
