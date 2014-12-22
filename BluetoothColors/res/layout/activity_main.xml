@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <Button
+        android:id="@+id/bServer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onServerClickListener"
+        android:text="Servidor" />
+
+    <Button
+        android:id="@+id/bClient"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/bServer"
+        android:onClick="onClientClickListener"
+        android:text="Cliente" />
+
+    <Button
+        android:id="@+id/bSend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/bClient"
+        android:onClick="onSendClickListener"
+        android:text="Enviar..." />
+
+    <Button
+        android:id="@+id/bClose"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/bSend"
+        android:onClick="onCloseClickListener"
+        android:text="Cerrar conexión" />
+
+</RelativeLayout>
