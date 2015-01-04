@@ -41,25 +41,6 @@ public class PaintActivity extends Activity implements OnColorChangedListener,
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.paint, menu);
-
-		MenuItem item = menu.findItem(R.id.menu_item_share);
-
-		mShareActionProvider = (ShareActionProvider) item.getActionProvider();
-		Intent shareIntent = new Intent();
-		shareIntent.setAction(Intent.ACTION_SEND);
-		shareIntent.putExtra(Intent.EXTRA_TEXT, "Que pedazo de dibujo!!");
-		File file = new File(this
-				.getCacheDir(), "temp.jpeg");
-		try {
-			file.createNewFile();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(file.getAbsolutePath()));
-		shareIntent.setType("image/jpeg");
-		mShareActionProvider.setShareIntent(shareIntent);
-
 		return true;
 	}
 
@@ -70,14 +51,11 @@ public class PaintActivity extends Activity implements OnColorChangedListener,
 			ColorPickerDialog colorPicker = new ColorPickerDialog(this,
 					paintView.getBrushColor());
 			colorPicker.show(getFragmentManager(), "color_chooser");
-			// new ColorPickerDialog(this, this,
-			// paintView.getBrushColor()).show();
 			break;
 		case R.id.action_brush_size:
 			BrushSizeDialog dialog = new BrushSizeDialog(this,
 					paintView.getBrushSize());
 			dialog.show(getFragmentManager(), "size_chooser");
-			// dialog.getDialog().setTitle("Tamaño pincel");
 			break;
 		case R.id.action_recycle:
 			paintView.clear();
@@ -102,8 +80,6 @@ public class PaintActivity extends Activity implements OnColorChangedListener,
 
 	@Override
 	public void sizeChanged(int size) {
-		// TODO Auto-generated method stub
 		paintView.setBrushSize(size);
 	}
-
 }

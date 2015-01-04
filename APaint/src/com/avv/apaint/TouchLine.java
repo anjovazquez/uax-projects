@@ -1,9 +1,13 @@
 package com.avv.apaint;
 
+import java.io.Serializable;
+
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public class TouchLine {
+public class TouchLine implements Serializable {
 	
 	private Path path;
 	private Paint paint;
@@ -32,7 +36,5 @@ public class TouchLine {
 	public void setPaint(Paint paint) {
 		this.paint = paint;
 	}
-	
-	 
 
 }

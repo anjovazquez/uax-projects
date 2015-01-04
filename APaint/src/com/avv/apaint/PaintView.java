@@ -1,18 +1,14 @@
 package com.avv.apaint;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.net.Uri;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -22,43 +18,46 @@ public class PaintView extends View {
 
 	private Paint circlePaint;
 	private Path circlePath;
-	
-	
 
 	private boolean clear = false;
 
 	private List<TouchLine> mTouchLines;
 	private List<TouchLine> mTouchLinesRedo;
 	private TouchLine currentLine;
-	
-	private Bitmap bitmap;
 
 	private void init() {
 
-		
-		mTouchLines = new ArrayList<TouchLine>();
-		mTouchLinesRedo = new ArrayList<TouchLine>();
-		Path mPath = new Path();
-		Paint mPaint = new Paint();
-		// mCanvas = new Canvas();
+		// mTouchLines = new ArrayList<TouchLine>();
+		// mTouchLinesRedo = new ArrayList<TouchLine>();
+		mTouchLines = MemoryPaintView.getInstance().getTouchLines();
+		mTouchLinesRedo = MemoryPaintView.getInstance().getTouchLinesRedo();
+		currentLine = MemoryPaintView.getInstance().getCurrentLine();
+		circlePath = MemoryPaintView.getInstance().getCirclePath();
 
-		mPaint.setAntiAlias(true);
-		mPaint.setDither(true);
-		mPaint.setColor(Color.GREEN);
-		mPaint.setStyle(Paint.Style.STROKE);
-		mPaint.setStrokeJoin(Paint.Join.ROUND);
-		mPaint.setStrokeCap(Paint.Cap.ROUND);
-		mPaint.setStrokeWidth(12);
+		if (mTouchLines.isEmpty()) {
 
-		mTouchLines.add(currentLine = new TouchLine(mPath, mPaint));
+			Path mPath = new Path();
+			Paint mPaint = new Paint();
 
-		circlePaint = new Paint();
-		circlePath = new Path();
-		circlePaint.setAntiAlias(true);
-		circlePaint.setColor(Color.BLUE);
-		circlePaint.setStyle(Paint.Style.STROKE);
-		circlePaint.setStrokeJoin(Paint.Join.MITER);
-		circlePaint.setStrokeWidth(4f);
+			mPaint.setAntiAlias(true);
+			mPaint.setDither(true);
+			mPaint.setColor(Color.GREEN);
+			mPaint.setStyle(Paint.Style.STROKE);
+			mPaint.setStrokeJoin(Paint.Join.ROUND);
+			mPaint.setStrokeCap(Paint.Cap.ROUND);
+			mPaint.setStrokeWidth(12);
+
+			mTouchLines.add(currentLine = new TouchLine(mPath, mPaint));
+
+			circlePaint = new Paint();
+			circlePath = new Path();
+			circlePaint.setAntiAlias(true);
+			circlePaint.setColor(Color.BLUE);
+			circlePaint.setStyle(Paint.Style.STROKE);
+			circlePaint.setStrokeJoin(Paint.Join.MITER);
+			circlePaint.setStrokeWidth(4f);
+
+		}
 	}
 
 	public PaintView(Context context) {
@@ -93,9 +92,8 @@ public class PaintView extends View {
 				canvas.drawPath(t.getPath(), t.getPaint());
 			}
 		}
-		canvas.drawPath(circlePath, circlePaint);
-		
-		
+//		canvas.drawPath(circlePath, circlePaint);
+
 	}
 
 	@Override
@@ -125,11 +123,10 @@ public class PaintView extends View {
 			currentLine.getPath().lineTo(mX, mY);
 			// mPath.lineTo(mX, mY);
 			circlePath.reset();
-			saveBitmapView();
 			break;
 		default:
 			break;
-		}		
+		}
 		invalidate();
 		return true;
 	}
@@ -192,17 +189,10 @@ public class PaintView extends View {
 		}
 	}
 	
-	public Uri saveBitmapView(){
-		File file = new File(this.getContext().getCacheDir(), "temp.jpeg");
-		try {
-			bitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
-			Canvas canvas = new Canvas(bitmap);
-			this.draw(canvas);
-			bitmap.compress(Bitmap.CompressFormat.JPEG, 100, new FileOutputStream(file));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-		return Uri.parse(file.getAbsolutePath());
+	@Override
+	protected Parcelable onSaveInstanceState() {
+		MemoryPaintView.getInstance().saveState(mTouchLines, mTouchLinesRedo, currentLine, circlePath);
+		return super.onSaveInstanceState();
 	}
 
 }
