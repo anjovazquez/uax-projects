@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">ATelesketch</string>
+    <string name="action_settings">Ajustes</string>
+    <string name="hello_world">Hola mundo!</string>
+    <string name="gravity_sensor_present">Usaremos el sensor de gravedad</string>
+    <string name="accelerometer_sensor_present">Usaremos el sensor acelerómetro</string>
+    <string name="no_sensors_present">No hay sensores presentes</string>
+</resources>

@@ -5,14 +5,12 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.hardware.SensorManager;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.WindowManager;
 
 public class TelesketchView extends View {
 
-	final float METER_TO_PIXEL = 10.0f;
+	final float METER_TO_PIXEL = 5.0f;
 
 	private Path mPath;
 	private Paint mPaint;
@@ -60,6 +58,14 @@ public class TelesketchView extends View {
 		super.onDraw(canvas);
 		canvas.drawPath(mPath, mPaint);
 	}
+	
+	public void clear(){
+		posX = getWidth() / 2;
+		posY = getHeight() / 2;
+		mPath = new Path();
+		mPath.moveTo(posX, posY);
+		invalidate();
+	}
 
 	public void setData(float x, float y) {
 
@@ -75,34 +81,34 @@ public class TelesketchView extends View {
 
 		long now = System.currentTimeMillis();
 		long ellapse = now - lastUpdateTime;
-		// if (ellapse > 1000) {
-		lastUpdateTime = now;
+		if (ellapse > 100) {
+			lastUpdateTime = now;
 
-		speedX += ((y * ellapse) / 1000.0f) * METER_TO_PIXEL;
-		speedY += ((x * ellapse) / 1000.0f) * METER_TO_PIXEL;
+			speedX += ((y * ellapse) / 1000.0f) * METER_TO_PIXEL;
+			speedY += ((x * ellapse) / 1000.0f) * METER_TO_PIXEL;
 
-		posX += ((speedX * ellapse) / 1000.0f);
-		posY += ((speedY * ellapse) / 1000.0f);
+			posX += ((speedX * ellapse) / 1000.0f);
+			posY += ((speedY * ellapse) / 1000.0f);
 
-		if (posX < radius) {
-			posX = radius;
-			speedX = 0;
-		} else if (posX > (getWidth() - radius)) {
-			posX = getWidth() - radius;
-			speedX = 0;
+			if (posX < radius) {
+				posX = radius;
+				speedX = 0;
+			} else if (posX > (getWidth() - radius)) {
+				posX = getWidth() - radius;
+				speedX = 0;
+			}
+
+			if (posY < radius) {
+				posY = radius;
+				speedY = 0;
+			} else if (posY > (getHeight() - radius)) {
+				posY = getHeight() - radius;
+				speedY = 0;
+			}
+
+			mPath.lineTo(posX, posY);
+			invalidate();
 		}
-
-		if (posY < radius) {
-			posY = radius;
-			speedY = 0;
-		} else if (posY > (getHeight() - radius)) {
-			posY = getHeight() - radius;
-			speedY = 0;
-		}
-
-		mPath.lineTo(posX, posY);
-		invalidate();
-		// }
 	}
 
 }
