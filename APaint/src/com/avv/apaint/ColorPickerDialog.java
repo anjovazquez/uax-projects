@@ -61,9 +61,4 @@ public class ColorPickerDialog extends DialogFragment {
 		
 		return view;
 	}
-
-	
-		
-
-//		setContentView(new ColorPickerView(getContext(), l, mInitialColor));
 }
