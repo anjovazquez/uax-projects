@@ -5,5 +5,7 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="action_search">Buscar</string>
-
+	<string name="fill_fields">Seleccione origen y destino</string>
+	<string name="distance_title">Distancia entre %1$s y %2$s</string>
+	<string name="title_map_info_dialog">Distancia</string>
 </resources>

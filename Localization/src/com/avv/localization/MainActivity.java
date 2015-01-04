@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -53,12 +54,13 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	private AutoCompleteTextView destination;
 	private GoogleMap map;
 	private String apiKey;
+	private boolean sattelite;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-
+		sattelite = false;
 		try {
 			ApplicationInfo app = getPackageManager().getApplicationInfo(
 					getPackageName(), PackageManager.GET_META_DATA);
@@ -71,26 +73,34 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(this) != ConnectionResult.SUCCESS) {
 			Toast.makeText(this, "Los mapas no están disponibles",
 					Toast.LENGTH_LONG).show();
+		} else {
+
+			map = ((MapFragment) getFragmentManager()
+					.findFragmentById(R.id.map)).getMap();
+
+			origin = (AutoCompleteTextView) findViewById(R.id.origin);
+			destination = (AutoCompleteTextView) findViewById(R.id.destination);
+			origin.setAdapter(new PlacesAutoCompleteAdapter(this,
+					R.layout.place_list_item));
+			destination.setAdapter(new PlacesAutoCompleteAdapter(this,
+					R.layout.place_list_item));
+			origin.setOnItemClickListener(this);
+			destination.setOnItemClickListener(this);
+
+			bLocalize = (Button) findViewById(R.id.localize);
+			bLocalize.setOnClickListener(new LocalizeListener());
 		}
+	}
 
-		map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map))
-				.getMap();
+	private class LocalizeListener implements View.OnClickListener {
 
-		origin = (AutoCompleteTextView) findViewById(R.id.origin);
-		destination = (AutoCompleteTextView) findViewById(R.id.destination);
-		origin.setAdapter(new PlacesAutoCompleteAdapter(this,
-				R.layout.place_list_item));
-		destination.setAdapter(new PlacesAutoCompleteAdapter(this,
-				R.layout.place_list_item));
-		origin.setOnItemClickListener(this);
-		destination.setOnItemClickListener(this);
-
-		bLocalize = (Button) findViewById(R.id.localize);
-		bLocalize.setOnClickListener(new View.OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
+		@Override
+		public void onClick(View v) {
+			if (origin.getText() != null && origin.getText().length() > 0
+					&& destination.getText() != null
+					&& destination.getText().length() > 0) {
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow(destination.getWindowToken(), 0);
 				map.clear();
 				Geocoder geocoder = new Geocoder(MainActivity.this);
 				try {
@@ -110,6 +120,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 									+ SphericalUtil.computeDistanceBetween(
 											positionOr, positionDest) / 1000
 									+ " km", Toast.LENGTH_LONG).show();
+
 					map.addMarker(new MarkerOptions()
 							.position(positionOr)
 							.title("origen")
@@ -134,33 +145,70 @@ public class MainActivity extends Activity implements OnItemClickListener {
 					map.moveCamera(CameraUpdateFactory.newLatLngZoom(
 							positionOr, map.getMaxZoomLevel()));
 					final Handler handler = new Handler();
-					handler.postDelayed(new Runnable() {
+					handler.postDelayed(new ZoomOutRunnable(), 1000);
+					handler.postDelayed(new AnimateToRunnable(positionDest),
+							1000);
 
-						@Override
-						public void run() {
-							// TODO Auto-generated method stub
-							map.animateCamera(CameraUpdateFactory.zoomOut());
-						}
-					}, 1000);
-
-					handler.postDelayed(new Runnable() {
-
-						@Override
-						public void run() {
-							map.animateCamera(CameraUpdateFactory
-									.newLatLngZoom(positionDest,
-											map.getMaxZoomLevel()));
-						}
-					}, 1000);
+					handler.postDelayed(new ShowDialogRunnable(positionOr,
+							positionDest), 3000);
 
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
-				findViewById(R.id.search_box).setVisibility(View.GONE);				
+
+				findViewById(R.id.search_box).setVisibility(View.GONE);
+			} else {
+				Toast.makeText(MainActivity.this,
+						getResources().getString(R.string.fill_fields),
+						Toast.LENGTH_SHORT).show();
 			}
-		});
+		}
+	}
+
+	private class ShowDialogRunnable implements Runnable {
+
+		private LatLng positionOr;
+		private LatLng positionDest;
+
+		public ShowDialogRunnable(LatLng positionOr, LatLng positionDest) {
+			this.positionOr = positionOr;
+			this.positionDest = positionDest;
+		}
+
+		@Override
+		public void run() {
+			MapInfoFragment dialog = new MapInfoFragment(origin.getText()
+					.toString(), destination.getText().toString(),
+					SphericalUtil.computeDistanceBetween(positionOr,
+							positionDest) / 1000 + " km");
+			dialog.show(getFragmentManager(), "distance_dialog");
+		}
+	}
+
+	private class ZoomOutRunnable implements Runnable {
+
+		@Override
+		public void run() {
+			map.animateCamera(CameraUpdateFactory.zoomOut());
+		}
+
+	}
+
+	private class AnimateToRunnable implements Runnable {
+
+		private LatLng positionTo;
+
+		public AnimateToRunnable(LatLng positionTo) {
+			this.positionTo = positionTo;
+		}
+
+		@Override
+		public void run() {
+			map.animateCamera(CameraUpdateFactory.newLatLngZoom(positionTo,
+					map.getMaxZoomLevel()));
+		}
+
 	}
 
 	@Override
@@ -176,13 +224,29 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
-		if (id == R.id.action_search) {
+		switch (id) {
+		case R.id.action_search:
 			findViewById(R.id.search_box).setVisibility(View.VISIBLE);
-			return true;
+			break;
+		case R.id.action_map:
+			if (!sattelite) {
+				map.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+				sattelite = true;
+			} else {
+				map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+				sattelite = false;
+			}
+			break;
+		default:
+			break;
 		}
+
 		return super.onOptionsItemSelected(item);
 	}
 
+	// El enfoque utilizado en este caso es el de usar el API de google Places
+	// y disponer de dos campos de autocompletado en los cuales seleccionar
+	// origen y destino unívocamente
 	private class PlacesAutoCompleteAdapter extends ArrayAdapter<String>
 			implements Filterable {
 		private ArrayList<String> resultList;
@@ -233,8 +297,6 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		}
 	}
 
-	private static final String LOG_TAG = "ExampleApp";
-
 	private static final String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place";
 	private static final String TYPE_AUTOCOMPLETE = "/autocomplete";
 	private static final String OUT_JSON = "/json";
@@ -262,10 +324,12 @@ public class MainActivity extends Activity implements OnItemClickListener {
 				jsonResults.append(buff, 0, read);
 			}
 		} catch (MalformedURLException e) {
-			Log.e(LOG_TAG, "Error processing Places API URL", e);
+			Log.e(getClass().getCanonicalName(),
+					"Error processing Places API URL", e);
 			return resultList;
 		} catch (IOException e) {
-			Log.e(LOG_TAG, "Error connecting to Places API", e);
+			Log.e(getClass().getCanonicalName(),
+					"Error connecting to Places API", e);
 			return resultList;
 		} finally {
 			if (conn != null) {
@@ -285,7 +349,8 @@ public class MainActivity extends Activity implements OnItemClickListener {
 						"description"));
 			}
 		} catch (JSONException e) {
-			Log.e(LOG_TAG, "Cannot process JSON results", e);
+			Log.e(getClass().getCanonicalName(), "Cannot process JSON results",
+					e);
 		}
 
 		return resultList;
