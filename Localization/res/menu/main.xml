@@ -14,5 +14,11 @@
         android:orderInCategory="100"
         android:showAsAction="ifRoom"
         android:title="@string/action_search"/>
+    <item
+        android:id="@+id/action_select_marker"
+        android:icon="@drawable/dark_marker"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom"
+        android:title="@string/action_select_marker"/>
 
 </menu>

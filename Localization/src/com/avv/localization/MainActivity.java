@@ -18,6 +18,8 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
@@ -36,6 +38,7 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.Toast;
 
+import com.avv.localization.SelectMarkerFragment.OnMarkerChangeListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -47,7 +50,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.SphericalUtil;
 
-public class MainActivity extends Activity implements OnItemClickListener {
+public class MainActivity extends Activity implements OnItemClickListener, OnMarkerChangeListener {
 
 	private Button bLocalize;
 	private AutoCompleteTextView origin;
@@ -56,10 +59,13 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	private String apiKey;
 	private boolean sattelite;
 
+	private int currentDrawable;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		currentDrawable = R.drawable.red_mark;
 		sattelite = false;
 		try {
 			ApplicationInfo app = getPackageManager().getApplicationInfo(
@@ -96,73 +102,80 @@ public class MainActivity extends Activity implements OnItemClickListener {
 
 		@Override
 		public void onClick(View v) {
-			if (origin.getText() != null && origin.getText().length() > 0
-					&& destination.getText() != null
-					&& destination.getText().length() > 0) {
-				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-				imm.hideSoftInputFromWindow(destination.getWindowToken(), 0);
-				map.clear();
-				Geocoder geocoder = new Geocoder(MainActivity.this);
-				try {
-					List<Address> mOrigins = geocoder.getFromLocationName(
-							origin.getText().toString(), 5);
-					List<Address> mDestinations = geocoder.getFromLocationName(
-							destination.getText().toString(), 5);
+			performClick();
+		}
+	}
+	
+	protected void performClick(){
 
-					LatLng positionOr = new LatLng(mOrigins.get(0)
-							.getLatitude(), mOrigins.get(0).getLongitude());
-					final LatLng positionDest = new LatLng(mDestinations.get(0)
-							.getLatitude(), mDestinations.get(0).getLongitude());
+		if (origin.getText() != null && origin.getText().length() > 0
+				&& destination.getText() != null
+				&& destination.getText().length() > 0) {
+			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.hideSoftInputFromWindow(destination.getWindowToken(), 0);
+			map.clear();
+			Geocoder geocoder = new Geocoder(MainActivity.this);
+			try {
+				List<Address> mOrigins = geocoder.getFromLocationName(
+						origin.getText().toString(), 5);
+				List<Address> mDestinations = geocoder.getFromLocationName(
+						destination.getText().toString(), 5);
 
-					Toast.makeText(
-							MainActivity.this,
-							"Distancia "
-									+ SphericalUtil.computeDistanceBetween(
-											positionOr, positionDest) / 1000
-									+ " km", Toast.LENGTH_LONG).show();
+				LatLng positionOr = new LatLng(mOrigins.get(0)
+						.getLatitude(), mOrigins.get(0).getLongitude());
+				final LatLng positionDest = new LatLng(mDestinations.get(0)
+						.getLatitude(), mDestinations.get(0).getLongitude());
 
-					map.addMarker(new MarkerOptions()
-							.position(positionOr)
-							.title("origen")
-							.snippet(mOrigins.get(0).getLocality())
-							.draggable(true)
-							.icon(BitmapDescriptorFactory
-									.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-					map.addMarker(new MarkerOptions()
-							.position(positionDest)
-							.title("destino")
-							.snippet(mDestinations.get(0).getLocality())
-							.draggable(true)
-							.icon(BitmapDescriptorFactory
-									.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+				Toast.makeText(
+						MainActivity.this,
+						"Distancia "
+								+ SphericalUtil.computeDistanceBetween(
+										positionOr, positionDest) / 1000
+								+ " km", Toast.LENGTH_LONG).show();
 
-					map.addPolyline(new PolylineOptions()
-							.add(positionOr)
-							.add(positionDest)
-							.color(getResources().getColor(
-									android.R.color.holo_red_dark)));
+				
+				Bitmap icon = BitmapFactory.decodeResource(MainActivity.this.getResources(),
+                        currentDrawable);
+				icon = Bitmap.createScaledBitmap(icon, 120, 120, false);
+				map.addMarker(new MarkerOptions()
+						.position(positionOr)
+						.title("origen")
+						.snippet(mOrigins.get(0).getLocality())
+						.draggable(true)
+						.icon(BitmapDescriptorFactory.fromBitmap(icon)));
+				map.addMarker(new MarkerOptions()
+						.position(positionDest)
+						.title("destino")
+						.snippet(mDestinations.get(0).getLocality())
+						.draggable(true)
+						.icon(BitmapDescriptorFactory.fromBitmap(icon)));
 
-					map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-							positionOr, map.getMaxZoomLevel()));
-					final Handler handler = new Handler();
-					handler.postDelayed(new ZoomOutRunnable(), 1000);
-					handler.postDelayed(new AnimateToRunnable(positionDest),
-							1000);
+				map.addPolyline(new PolylineOptions()
+						.add(positionOr)
+						.add(positionDest)
+						.color(getResources().getColor(
+								android.R.color.holo_red_dark)));
 
-					handler.postDelayed(new ShowDialogRunnable(positionOr,
-							positionDest), 3000);
+				map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+						positionOr, map.getMaxZoomLevel()));
+				final Handler handler = new Handler();
+				handler.postDelayed(new ZoomOutRunnable(), 1000);
+				handler.postDelayed(new AnimateToRunnable(positionDest),
+						1000);
 
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				handler.postDelayed(new ShowDialogRunnable(positionOr,
+						positionDest), 3000);
 
-				findViewById(R.id.search_box).setVisibility(View.GONE);
-			} else {
-				Toast.makeText(MainActivity.this,
-						getResources().getString(R.string.fill_fields),
-						Toast.LENGTH_SHORT).show();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
+
+			findViewById(R.id.search_box).setVisibility(View.GONE);
+		} else {
+			Toast.makeText(MainActivity.this,
+					getResources().getString(R.string.fill_fields),
+					Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -236,6 +249,10 @@ public class MainActivity extends Activity implements OnItemClickListener {
 				map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 				sattelite = false;
 			}
+			break;
+		case R.id.action_select_marker:
+			SelectMarkerFragment dialog = new SelectMarkerFragment(this);
+			dialog.show(getFragmentManager(), "select_marker");
 			break;
 		default:
 			break;
@@ -363,5 +380,23 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		String str = (String) adapterView.getItemAtPosition(position);
 		Toast.makeText(this, str, Toast.LENGTH_SHORT).show();
 
+	}
+
+	@Override
+	public void markerChanged(int marker) {
+		currentDrawable = marker;
+		Log.d(getClass().getCanonicalName(), "marker changed "+marker);
+	}
+	
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		// TODO Auto-generated method stub
+		super.onSaveInstanceState(outState);
+	}
+	
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		super.onRestoreInstanceState(savedInstanceState);
+		performClick();
 	}
 }

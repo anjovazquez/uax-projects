@@ -8,4 +8,14 @@
 	<string name="fill_fields">Seleccione origen y destino</string>
 	<string name="distance_title">Distancia entre %1$s y %2$s</string>
 	<string name="title_map_info_dialog">Distancia</string>
+	<string name="action_select_marker">Selección marcador</string>
+	
+	<string name="blue_darker_mark">Azul oscuro</string>
+	<string name="blue_mark">Azul</string>
+	<string name="dark_marker">Oscuro</string>
+	<string name="green_darker_mark">Verde oscuro</string>
+	<string name="green_mark">Verde</string>
+	<string name="orange_mark">Naranja</string>
+	<string name="pink_mark">Rosa</string>
+	<string name="red_mark">Rojo</string>
 </resources>
