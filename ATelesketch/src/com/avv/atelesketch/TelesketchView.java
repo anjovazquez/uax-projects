@@ -15,99 +15,134 @@ public class TelesketchView extends View {
 	private Path mPath;
 	private Paint mPaint;
 
-	float radius = 30;
-	float posX = radius;
-	float posY = radius;
+	float distanceToEdge = 15;
+	float posX = this.distanceToEdge;
+	float posY = this.distanceToEdge;
 
 	float speedX = 0;
 	float speedY = 0;
 
 	long lastUpdateTime = 0;
 
+	/*
+	 * Inicializamos el pincel y el objeto que encapsula los datos del camino
+	 * que sigue nuestra línea
+	 */
 	private void init() {
-		mPath = new Path();
-		mPaint = new Paint();
+		this.mPath = new Path();
+		this.mPaint = new Paint();
 
-		mPaint.setAntiAlias(true);
-		mPaint.setDither(true);
-		mPaint.setColor(Color.GREEN);
-		mPaint.setStyle(Paint.Style.STROKE);
-		mPaint.setStrokeJoin(Paint.Join.ROUND);
-		mPaint.setStrokeCap(Paint.Cap.ROUND);
-		mPaint.setStrokeWidth(12);
+		this.mPaint.setAntiAlias(true);
+		this.mPaint.setDither(true);
+		this.mPaint.setColor(Color.GREEN);
+		this.mPaint.setStyle(Paint.Style.STROKE);
+		this.mPaint.setStrokeJoin(Paint.Join.ROUND);
+		this.mPaint.setStrokeCap(Paint.Cap.ROUND);
+		this.mPaint.setStrokeWidth(30);
 
 	}
 
 	public TelesketchView(Context context) {
 		super(context);
-		init();
+		this.init();
 	}
 
 	public TelesketchView(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
-		init();
+		this.init();
 	}
 
 	public TelesketchView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		init();
+		this.init();
 	}
 
+	/*
+	 * Pintamos lo que contenga el objeto mPath con el pincel mPaint
+	 * 
+	 * @see android.view.View#onDraw(android.graphics.Canvas)
+	 */
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		canvas.drawPath(mPath, mPaint);
-	}
-	
-	public void clear(){
-		posX = getWidth() / 2;
-		posY = getHeight() / 2;
-		mPath = new Path();
-		mPath.moveTo(posX, posY);
-		invalidate();
+		canvas.drawPath(this.mPath, this.mPaint);
 	}
 
+	/*
+	 * Borramos lo pintado inicializando el objeto mPath y colocando en el
+	 * centro de la imagen el punto
+	 */
+	public void clear() {
+		this.posX = this.getWidth() / 2;
+		this.posY = this.getHeight() / 2;
+		this.mPath = new Path();
+		this.mPath.moveTo(this.posX, this.posY);
+		this.invalidate();
+	}
+
+	/*
+	 * Actualizamos los puntos en el camino seguido
+	 */
 	public void setData(float x, float y) {
 
-		if (lastUpdateTime == 0) {
-			posX = getWidth() / 2;
-			posY = getHeight() / 2;
+		if (this.lastUpdateTime == 0) {
+			this.posX = this.getWidth() / 2;
+			this.posY = this.getHeight() / 2;
 
-			mPath.moveTo(posX, posY);
+			this.mPath.moveTo(this.posX, this.posY);
 
-			lastUpdateTime = System.currentTimeMillis();
+			this.lastUpdateTime = System.currentTimeMillis();
 			return;
 		}
 
 		long now = System.currentTimeMillis();
-		long ellapse = now - lastUpdateTime;
+		long ellapse = now - this.lastUpdateTime;
 		if (ellapse > 100) {
-			lastUpdateTime = now;
+			this.lastUpdateTime = now;
 
-			speedX += ((y * ellapse) / 1000.0f) * METER_TO_PIXEL;
-			speedY += ((x * ellapse) / 1000.0f) * METER_TO_PIXEL;
+			/*
+			 * Las coordenadas se nos proporcionan en m/s2 (unidad de medida de
+			 * la aceleración) para conocer la velocidad mutiplicamos por el
+			 * tiempo desde la última actualización obtenemos el resultado en
+			 * m/s que convertimos a pixeles como tenemos la actividad en
+			 * landscape es necesario intercambiar los valores
+			 */
+			this.speedX += ((y * ellapse) / 1000.0f) * this.METER_TO_PIXEL;
+			this.speedY += ((x * ellapse) / 1000.0f) * this.METER_TO_PIXEL;
 
-			posX += ((speedX * ellapse) / 1000.0f);
-			posY += ((speedY * ellapse) / 1000.0f);
+			/*
+			 * Para ver el punto en el que se encuentra ahora dentro del dibujo
+			 * multiplicamos por ellapse que es la diferencia con la última
+			 * actualización y obtenemos la posición del pixel
+			 */
+			this.posX += ((this.speedX * ellapse) / 1000.0f);
+			this.posY += ((this.speedY * ellapse) / 1000.0f);
 
-			if (posX < radius) {
-				posX = radius;
-				speedX = 0;
-			} else if (posX > (getWidth() - radius)) {
-				posX = getWidth() - radius;
-				speedX = 0;
+			/*
+			 * Comprobamos que en el mapeo que hemos hecho no se sale del marco
+			 * de nuestra vista
+			 */
+			if (this.posX < this.distanceToEdge) {
+				this.posX = this.distanceToEdge;
+				this.speedX = 0;
+			} else if (this.posX > (this.getWidth() - this.distanceToEdge)) {
+				this.posX = this.getWidth() - this.distanceToEdge;
+				this.speedX = 0;
 			}
 
-			if (posY < radius) {
-				posY = radius;
-				speedY = 0;
-			} else if (posY > (getHeight() - radius)) {
-				posY = getHeight() - radius;
-				speedY = 0;
+			if (this.posY < this.distanceToEdge) {
+				this.posY = this.distanceToEdge;
+				this.speedY = 0;
+			} else if (this.posY > (this.getHeight() - this.distanceToEdge)) {
+				this.posY = this.getHeight() - this.distanceToEdge;
+				this.speedY = 0;
 			}
 
-			mPath.lineTo(posX, posY);
-			invalidate();
+			/*
+			 * Añadimos un punto a nuestra línea
+			 */
+			this.mPath.lineTo(this.posX, this.posY);
+			this.invalidate();
 		}
 	}
 
