@@ -2,29 +2,33 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical" 
+    android:background="@color/background_main">
+
+    <ImageButton
+        android:id="@+id/bTakePicture"
+        android:layout_width="60dip"
+        android:layout_height="60dip"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:src="@android:drawable/ic_menu_camera"
+        android:background="@drawable/button_selector"
+        android:onClick="takePhoto" />
 
     <com.avv.framecamera.CameraPreview
         android:id="@+id/camera_preview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_centerInParent="true"
+        android:layout_toLeftOf="@id/bTakePicture"
         android:background="@drawable/frame_border" >
     </com.avv.framecamera.CameraPreview>
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:background="@android:drawable/ic_menu_camera" 
-        android:onClick="takePhoto"/>
-    
-    <ImageView android:id="@+id/imageView"
+    <ImageView
+        android:id="@+id/imageView"
         android:layout_width="75dp"
         android:layout_height="75dp"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"/>
-        
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>
