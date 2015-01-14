@@ -10,57 +10,62 @@ import com.avv.bluetoothgame.presenter.ConnectionListener;
 public class ServerConnectionThread extends Thread {
 
 	private final ConnectionListener connectionListener;
-	private final BluetoothServerSocket acceptSocket;
-
+	private BluetoothServerSocket acceptSocket;
 	ServerConnectionThread serverConnectionThread;
 
 	public ServerConnectionThread(ConnectionListener connectionListener) {
 		// TODO Auto-generated constructor stub
 		this.connectionListener = connectionListener;
-
-		BluetoothServerSocket acceptSocketTemp = null;
-		try {
-			acceptSocketTemp = BluetoothAdapter.getDefaultAdapter()
-					.listenUsingInsecureRfcommWithServiceRecord(
-							BluetoothGamePresenter.NAME, BluetoothGamePresenter.THE_UUID);
-		} catch (Exception e) {
-			connectionListener.onConnectionFailed("No se pudo crear el socket");
-		}
-
-		acceptSocket = acceptSocketTemp;
 	}
 
 	@Override
 	public void run() {
-		BluetoothSocket socket = null;
 
-		while (true) {
+		for (int i = 0; i < 2; i++) {
+			BluetoothServerSocket acceptSocketTemp = null;
 			try {
-				socket = acceptSocket.accept();
+				acceptSocketTemp = BluetoothAdapter.getDefaultAdapter()
+						.listenUsingInsecureRfcommWithServiceRecord(
+								BluetoothGamePresenter.NAME,
+								BluetoothGamePresenter.THE_UUIDS[i]);
 			} catch (Exception e) {
-				connectionListener
+				this.connectionListener
+						.onConnectionFailed("No se pudo crear el socket");
+			}
+
+			this.acceptSocket = acceptSocketTemp;
+
+			BluetoothSocket socket = null;
+
+			// while (true) {
+			try {
+				socket = this.acceptSocket.accept();
+			} catch (Exception e) {
+				this.connectionListener
 						.onConnectionFailed("Error al aceptar el socket "
 								+ e.getMessage());
-				break;
+				// break;
 			}
 
 			if (socket != null) {
-				connectionListener.onConnected(socket);
+				this.connectionListener.onConnected(socket);
 				try {
-					acceptSocket.close();
+					this.acceptSocket.close();
 				} catch (Exception e) {
 
 				}
-				break;
+				// break;
 			}
+			// }
 		}
+
 	}
 
 	public void cancel() {
 		try {
-			acceptSocket.close();
+			this.acceptSocket.close();
 		} catch (Exception e) {
-			connectionListener.onConnectionFailed("Se canceló el hilo");
+			this.connectionListener.onConnectionFailed("Se cancelÃ³ el hilo");
 		}
 	}
 }

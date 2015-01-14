@@ -6,4 +6,10 @@ public interface BluetoothGameView {
 
 	Context getContext();
 
+	void renderColorBackground(int color);
+
+	void renderClientRolUI();
+
+	void renderServerRolUI();
+
 }

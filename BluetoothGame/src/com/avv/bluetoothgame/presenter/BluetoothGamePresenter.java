@@ -1,5 +1,7 @@
 package com.avv.bluetoothgame.presenter;
 
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.UUID;
@@ -9,6 +11,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.view.View;
 
 import com.avv.bluetoothgame.receiver.BluetoothDeviceSelectedReceiver;
@@ -17,31 +20,40 @@ import com.avv.bluetoothgame.threads.ClientConnectionThread;
 import com.avv.bluetoothgame.threads.ConnectedThread;
 import com.avv.bluetoothgame.threads.ServerConnectionThread;
 import com.avv.bluetoothgame.view.BluetoothGameView;
+import com.avv.bluetoothgame.view.adapter.PaintColor;
 
 public class BluetoothGamePresenter implements Presenter, ConnectionListener,
 		Observer {
 
-	public static final String NAME = "BluetoothColors";
-	public static final UUID THE_UUID = UUID
-			.fromString("42ad6984-fd66-4b11-900f-a52b454e34ae");
+	private static final int SERVER = 0;
+	private static final int CLIENT = 1;
+	private int rol = -1;
+
+	public static final String NAME = "BluetoothGame";
+	public static final UUID[] THE_UUIDS = {
+			UUID.fromString("42ad6984-fd66-4b11-900f-a52b454e34ae"),
+			UUID.fromString("42ad6985-fd66-4b11-900f-a52b454e34ae") };
 
 	final int REQUEST_DISCOVERABLE = 1;
 	final int REQUEST_ENABLE_BLUETOOTH = 2;
 
-	private BluetoothGameView bgView;
+	private final BluetoothGameView bgView;
 
 	private ConnectedThread connectedThread;
 	private ClientConnectionThread clientConnectionThread;
 	private ServerConnectionThread serverConnectionThread;
 
 	private BluetoothDeviceSelectedReceiver bluetoothDeviceSelectedReceiver;
+	private final Hashtable<String, ConnectedThread> connectedDevices;
 
 	public BluetoothGamePresenter(BluetoothGameView view) {
 		this.bgView = view;
+		this.connectedDevices = new Hashtable<String, ConnectedThread>();
 	}
 
 	private void openSelectDevice() {
-		bgView.getContext()
+		this.bgView
+				.getContext()
 				.startActivity(
 						new Intent(
 								"android.bluetooth.devicepicker.action.LAUNCH")
@@ -60,33 +72,36 @@ public class BluetoothGamePresenter implements Presenter, ConnectionListener,
 				BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
 		discoverIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,
 				120);
-		((Activity) bgView.getContext()).startActivityForResult(discoverIntent,
-				REQUEST_DISCOVERABLE);
+		((Activity) this.bgView.getContext()).startActivityForResult(
+				discoverIntent, this.REQUEST_DISCOVERABLE);
 	}
 
 	public void onClientClickListener(View view) {
 		if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
 			Intent enableBluetoothIntent = new Intent(
 					BluetoothAdapter.ACTION_REQUEST_ENABLE);
-			((Activity) bgView.getContext()).startActivityForResult(
-					enableBluetoothIntent, REQUEST_ENABLE_BLUETOOTH);
+			((Activity) this.bgView.getContext()).startActivityForResult(
+					enableBluetoothIntent, this.REQUEST_ENABLE_BLUETOOTH);
 			return;
 		}
 
-		openSelectDevice();
+		this.openSelectDevice();
 	}
 
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch (requestCode) {
 		case REQUEST_DISCOVERABLE:
 			if (resultCode != Activity.RESULT_CANCELED) {
-				serverConnectionThread = new ServerConnectionThread(this);
-				serverConnectionThread.start();
+				this.serverConnectionThread = new ServerConnectionThread(this);
+				this.serverConnectionThread.start();
+
+				this.bgView.renderServerRolUI();
+				this.rol = SERVER;
 			}
 			break;
 		case REQUEST_ENABLE_BLUETOOTH:
 			if (resultCode == Activity.RESULT_OK) {
-				openSelectDevice();
+				this.openSelectDevice();
 			}
 			break;
 		default:
@@ -98,39 +113,58 @@ public class BluetoothGamePresenter implements Presenter, ConnectionListener,
 	public void resume() {
 		ObservableDevice device = ObservableDevice.getInstance();
 		device.addObserver(this);
-		bgView.getContext()
+
+		this.bluetoothDeviceSelectedReceiver = new BluetoothDeviceSelectedReceiver();
+		this.bgView
+				.getContext()
 				.registerReceiver(
-						bluetoothDeviceSelectedReceiver,
+						this.bluetoothDeviceSelectedReceiver,
 						new IntentFilter(
 								"android.bluetooth.devicepicker.action.DEVICE_SELECTED"));
 	}
 
 	@Override
 	public void pause() {
-		bgView.getContext().unregisterReceiver(bluetoothDeviceSelectedReceiver);
-		closeAllThreads();
+		this.bgView.getContext().unregisterReceiver(
+				this.bluetoothDeviceSelectedReceiver);
+		this.closeAllThreads();
 	}
 
 	private void closeAllThreads() {
-		if (serverConnectionThread != null) {
-			serverConnectionThread.cancel();
-			serverConnectionThread = null;
+		if (this.serverConnectionThread != null) {
+			this.serverConnectionThread.cancel();
+			this.serverConnectionThread = null;
 		}
-		if (clientConnectionThread != null) {
-			clientConnectionThread.cancel();
-			clientConnectionThread = null;
+		if (this.clientConnectionThread != null) {
+			this.clientConnectionThread.cancel();
+			this.clientConnectionThread = null;
 		}
-		if (connectedThread != null) {
-			connectedThread.cancel();
-			connectedThread = null;
+		if (this.connectedThread != null) {
+			this.connectedThread.cancel();
+			this.connectedThread = null;
 		}
 	}
 
 	@Override
 	public void onConnected(BluetoothSocket socket) {
-		connectedThread = new ConnectedThread(socket,
-				(Activity) bgView.getContext(), this);
-		connectedThread.start();
+		if (this.rol == CLIENT) {
+			((Activity) this.bgView).runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					BluetoothGamePresenter.this.bgView.renderClientRolUI();
+
+				}
+			});
+		}
+
+		this.connectedThread = new ConnectedThread(socket,
+				this.bgView.getContext(), this);
+		this.connectedThread.start();
+		if (this.rol == SERVER) {
+			this.connectedDevices.put(socket.getRemoteDevice().getAddress(),
+					this.connectedThread);
+		}
 	}
 
 	@Override
@@ -147,13 +181,53 @@ public class BluetoothGamePresenter implements Presenter, ConnectionListener,
 	public void update(Observable observable, Object paramObject) {
 		ObservableDevice observableObject = ObservableDevice.getInstance();
 
-		if (clientConnectionThread != null) {
-			clientConnectionThread.cancel();
+		if (this.clientConnectionThread != null) {
+			this.clientConnectionThread.cancel();
 		}
 
-		clientConnectionThread = new ClientConnectionThread(
+		this.clientConnectionThread = new ClientConnectionThread(
 				observableObject.getDevice(), this);
-		clientConnectionThread.start();
+		this.clientConnectionThread.start();
+
+		this.rol = CLIENT;
+	}
+
+	public void changeColor(PaintColor paintColor) {
+		if ((this.rol == CLIENT) && (this.connectedThread != null)) {
+			String hexColor = String.format("#%06X",
+					(0xFFFFFF & paintColor.getColor()));
+			this.connectedThread.send(hexColor.getBytes());
+		}
+
+		if ((this.rol == SERVER) && !this.connectedDevices.isEmpty()) {
+			for (Enumeration<String> en = this.connectedDevices.keys(); en
+					.hasMoreElements();) {
+				String key = en.nextElement();
+				ConnectedThread th = this.connectedDevices.get(key);
+				String hexColor = String.format("#%06X",
+						(0xFFFFFF & paintColor.getColor()));
+				// this.connectedThread.send(hexColor.getBytes());
+				th.send(hexColor.getBytes());
+			}
+		}
+
+	}
+
+	@Override
+	public void onMessageReceived(final String message) {
+
+		if (this.rol == CLIENT) {
+			((Activity) this.bgView).runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					BluetoothGamePresenter.this.bgView
+							.renderColorBackground(Color.parseColor(message));
+
+				}
+			});
+
+		}
 	}
 
 }

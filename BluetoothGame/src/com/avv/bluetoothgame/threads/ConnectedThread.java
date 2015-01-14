@@ -16,10 +16,7 @@ public class ConnectedThread extends Thread {
 
 	private final InputStream inputStream;
 	private final OutputStream outputStream;
-
-	private Context context;
-
-	private ConnectionListener connectionListener;
+	private final ConnectionListener connectionListener;
 
 	Vibrator vibrator;
 
@@ -27,9 +24,8 @@ public class ConnectedThread extends Thread {
 			ConnectionListener connectionListener) {
 
 		this.socket = socket;
-		this.context = context;
 		this.connectionListener = connectionListener;
-		vibrator = (Vibrator) context
+		this.vibrator = (Vibrator) context
 				.getSystemService(Context.VIBRATOR_SERVICE);
 
 		InputStream inTemp = null;
@@ -43,8 +39,8 @@ public class ConnectedThread extends Thread {
 					.onDisconnected("No se pueden abrir los canales de E/S");
 		}
 
-		inputStream = inTemp;
-		outputStream = outTemp;
+		this.inputStream = inTemp;
+		this.outputStream = outTemp;
 	}
 
 	@Override
@@ -55,27 +51,19 @@ public class ConnectedThread extends Thread {
 		while (true) {
 			try {
 
-				readed = inputStream.read(buffer);
+				readed = this.inputStream.read(buffer);
 
 				if (readed > 0) {
 					final byte temp[] = new byte[readed];
 					System.arraycopy(buffer, 0, temp, 0, readed);
 
-//					activity.runOnUiThread(new Runnable() {
-//
-//						@Override
-//						public void run() {
-//							// TODO Auto-generated method stub
-//							Toast.makeText(activity, new String(temp),
-//									Toast.LENGTH_SHORT).show();
-//						}
-//					});
+					this.connectionListener.onMessageReceived(new String(temp));
 
-					vibrator.vibrate(100);
+					this.vibrator.vibrate(100);
 				}
 
 			} catch (IOException e) {
-				connectionListener.onDisconnected("Error al leer "
+				this.connectionListener.onDisconnected("Error al leer "
 						+ e.getMessage());
 				break;
 			}
@@ -84,9 +72,9 @@ public class ConnectedThread extends Thread {
 
 	public void send(byte[] buffer) {
 		try {
-			outputStream.write(buffer);
+			this.outputStream.write(buffer);
 		} catch (Exception e) {
-			connectionListener.onDisconnected("Error al escribir "
+			this.connectionListener.onDisconnected("Error al escribir "
 					+ e.getMessage());
 		}
 	}
@@ -94,7 +82,7 @@ public class ConnectedThread extends Thread {
 	public void cancel() {
 		// TODO Auto-generated method stub
 		try {
-			socket.close();
+			this.socket.close();
 		} catch (Exception e) {
 
 		}

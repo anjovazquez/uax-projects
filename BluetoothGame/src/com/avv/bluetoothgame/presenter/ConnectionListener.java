@@ -9,4 +9,6 @@ public interface ConnectionListener {
 	public void onConnectionFailed(final String message);
 
 	public void onDisconnected(final String message);
+
+	public void onMessageReceived(final String message);
 }
