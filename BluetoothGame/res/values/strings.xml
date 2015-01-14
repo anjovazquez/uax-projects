@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">BluetoothGame</string>
+    <string name="welcome_to_bg">Bienvenido a BG, elija su rol!</string>
+    <string name="client">Cliente BG</string>
+    <string name="server">Servidor BG</string>
+    <string name="black">Negro</string>
+    <string name="red">Rojo</string>
+    <string name="yellow">Amarillo</string>
+    <string name="magenta">Magenta</string>
+    <string name="green">Verde</string>
+    <string name="blue">Azul</string>
+    <string name="white">Blanco</string>
+
+</resources>

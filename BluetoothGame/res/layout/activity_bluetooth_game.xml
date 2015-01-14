@@ -1,0 +1,42 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="${relativePackage}.${activityClass}" >
+
+    <TextView
+        android:id="@+id/welcome_to_bg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="170dp"
+        android:text="@string/welcome_to_bg"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/client"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/welcome_to_bg"
+        android:text="@string/client"
+        android:onClick="onClientRolClick" />
+
+    <Button
+        android:id="@+id/server"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/welcome_to_bg"
+        android:layout_toRightOf="@id/client"
+        android:text="@string/server"
+        android:onClick="onServerRolClick"  />
+
+    <Spinner
+        android:id="@+id/colors"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/client"
+        android:visibility="visible" />
+
+</RelativeLayout>
