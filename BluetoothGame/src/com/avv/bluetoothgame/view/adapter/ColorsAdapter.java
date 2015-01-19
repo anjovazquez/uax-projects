@@ -12,6 +12,12 @@ import android.widget.TextView;
 
 import com.avv.bluetoothgame.R;
 
+/**
+ * Adaptor de objetos que representan un color y su nombre
+ * 
+ * @author angelvazquez
+ * 
+ */
 public class ColorsAdapter extends ArrayAdapter<PaintColor> {
 
 	private final LayoutInflater inflater;

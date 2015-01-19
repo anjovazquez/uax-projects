@@ -4,6 +4,14 @@ import java.util.Observable;
 
 import android.bluetooth.BluetoothDevice;
 
+/**
+ * Este objeto nos valdra para encapsular el resultado que nos devolvera el
+ * BroadcastReceiver declarado. Registraremo el Presenter como Observador de
+ * este objeto y cuando cambie se nos notificara
+ * 
+ * @author angelvazquez
+ * 
+ */
 public class ObservableDevice extends Observable {
 
 	private BluetoothDevice device;
@@ -21,12 +29,12 @@ public class ObservableDevice extends Observable {
 
 	public void setDevice(BluetoothDevice device) {
 		this.device = device;
-		setChanged();
-		notifyObservers();
+		this.setChanged();
+		this.notifyObservers();
 	}
 
 	public BluetoothDevice getDevice() {
-		return device;
+		return this.device;
 	}
 
 }

@@ -23,6 +23,9 @@ import com.avv.bluetoothgame.view.adapter.ColorsAdapter;
 import com.avv.bluetoothgame.view.adapter.PaintColor;
 
 /**
+ * Nuestra actividad que será nuestra Vista en el patrón MVP implementa la
+ * interfaz de operaciones de vista
+ * 
  * @author angel.vazquez
  * 
  */
@@ -52,6 +55,14 @@ public class BluetoothGame extends Activity implements BluetoothGameView {
 		this.spinColors.setAdapter(new ColorsAdapter(this, colors));
 		this.spinColors.setOnItemSelectedListener(new OnItemSelectedListener() {
 
+			/*
+			 * Una vez se selecciona un elemento se comunica al Presenter para
+			 * que haga lo que necesite con el
+			 * 
+			 * @see
+			 * android.widget.AdapterView.OnItemSelectedListener#onItemSelected
+			 * (android.widget.AdapterView, android.view.View, int, long)
+			 */
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view,
 					int position, long id) {
@@ -70,31 +81,67 @@ public class BluetoothGame extends Activity implements BluetoothGameView {
 
 		});
 
+		/**
+		 * Inicializamos el Presenter al que le pasamos el conocimiento sobre la
+		 * vista
+		 */
 		this.presenter = new BluetoothGamePresenter(this);
 
+		/**
+		 * Delegamos en el Presenter las operaciones tipicas que antes haciamos
+		 * en la vista y que se considera que no deberian estar aqui con el fin
+		 * de desacoplar
+		 */
 		this.presenter.resume();
 	}
 
+	/*
+	 * Una vez se destruye la vista delegamos las operaciones necesarias en el
+	 * Presenter
+	 * 
+	 * @see android.app.Activity#onDestroy()
+	 */
 	@Override
 	protected void onDestroy() {
 		this.presenter.pause();
 		super.onDestroy();
 	}
 
+	/**
+	 * Delegamos el listener del boton de actuar como cliente
+	 * 
+	 * @param view
+	 */
 	public void onClientRolClick(View view) {
 		this.presenter.onClientClickListener(view);
 	}
 
+	/**
+	 * Delegamos el listener del boton de actuar como servidor
+	 * 
+	 * @param view
+	 */
 	public void onServerRolClick(View view) {
 		this.presenter.onServerClickListener(view);
 	}
 
+	/*
+	 * Las respuestas las delegamos en el presenter
+	 * 
+	 * @see android.app.Activity#onActivityResult(int, int,
+	 * android.content.Intent)
+	 */
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		this.presenter.onActivityResult(requestCode, resultCode, data);
 	}
 
+	/**
+	 * Inicializamos los colores posibles
+	 * 
+	 * @return
+	 */
 	private List<PaintColor> initColors() {
 		ArrayList<PaintColor> colors = new ArrayList<PaintColor>();
 		Resources res = this.getResources();
@@ -114,11 +161,22 @@ public class BluetoothGame extends Activity implements BluetoothGameView {
 		return this;
 	}
 
+	/*
+	 * Cambia el color del fondo
+	 * 
+	 * @see
+	 * com.avv.bluetoothgame.view.BluetoothGameView#renderColorBackground(int)
+	 */
 	@Override
 	public void renderColorBackground(int color) {
 		this.spinColors.getRootView().setBackgroundColor(color);
 	}
 
+	/*
+	 * Modifica la UI cuando se actua como cliente
+	 * 
+	 * @see com.avv.bluetoothgame.view.BluetoothGameView#renderClientRolUI()
+	 */
 	@Override
 	public void renderClientRolUI() {
 		// TODO Auto-generated method stub
@@ -129,6 +187,11 @@ public class BluetoothGame extends Activity implements BluetoothGameView {
 		this.bRolServer.setVisibility(View.GONE);
 	}
 
+	/*
+	 * Modifica la UI cuando se actua como servidor
+	 * 
+	 * @see com.avv.bluetoothgame.view.BluetoothGameView#renderServerRolUI()
+	 */
 	@Override
 	public void renderServerRolUI() {
 		this.spinColors.setVisibility(View.VISIBLE);
@@ -136,5 +199,15 @@ public class BluetoothGame extends Activity implements BluetoothGameView {
 		this.tInfo.setVisibility(View.GONE);
 		this.bRolClient.setVisibility(View.GONE);
 		this.bRolServer.setVisibility(View.GONE);
+	}
+
+	/*
+	 * Modifica la UI cuando ocurre un error
+	 * 
+	 * @see com.avv.bluetoothgame.view.BluetoothGameView#renderErrorUI()
+	 */
+	@Override
+	public void renderErrorUI() {
+
 	}
 }
