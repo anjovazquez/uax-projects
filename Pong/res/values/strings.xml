@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Pong</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="tCustomize">Elegir fondo</string>
+    <string name="rLifes">Vidas</string>
+    <string name="rDifficulty">Dificultad</string>
+    <string name="tNewGame">Nueva partida</string>
+    <string name="tSettings">Opciones</string>
+    <string name="tControls">Controles</string>
+     <string name="welcomePong">Bienvenido a Pong!</string>
+     <string name="tOnePlayer">1 jugador</string>
+     <string name="tTwoPlayer">2 jugadores</string>
+     <string name="cFinger">Tactil</string>
+     <string name="cSensor">Sensor</string>
+
+</resources>
